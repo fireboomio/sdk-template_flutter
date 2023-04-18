@@ -1,0 +1,10 @@
+{{#with (realType type)~}}
+  {{#if (equalAny this 'string,number,integer,boolean')}}
+    {{~#equal this 'number'}}double{{/equal}}
+    {{~#equal this 'integer'}}int{{/equal}}
+    {{~#equal this 'boolean'}}bool{{/equal}}
+    {{~#equal this 'string'}}String{{/equal}}
+  {{~else}}
+    {{~this~}}
+  {{/if~}}
+{{~/with}}

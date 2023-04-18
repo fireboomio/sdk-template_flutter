@@ -1,0 +1,33 @@
+@JsonSerializable()
+class {{upperFirst parentName}} {
+{{#each schemaData as |schema name|}}
+  {{~#equal (realType schema.type) 'object'}}
+  {{#with (fmtSprintf '%s_%s' (upperFirst parentName) (upperFirst name))}}
+  {{> struct_property maxLength=(getMaxLength maxLengthMap parentName schemaData) isRequired=(stringInArray name requiredKeys) isSubStruct=(putSubSchema subSchemaMap this schema.properties requiredKeys) name=name type=this~}}
+  {{/with}}
+  {{/equal~}}
+  {{~#equal (realType schema.type) 'array'}}
+    {{#with schema.items}}
+      {{#if properties~}}
+  {{#with (fmtSprintf '%s_%s' (upperFirst parentName) (upperFirst name))}}
+  {{> struct_property ref=schema.ref maxLength=(getMaxLength maxLengthMap parentName schemaData) isRequired=(stringInArray name requiredKeys) isSubStruct=(putSubSchema subSchemaMap this properties requiredKeys) isArray=true name=name type=this~}}
+  {{/with~}}
+      {{else}}
+  {{> struct_property maxLength=(getMaxLength maxLengthMap parentName schemaData) isRequired=(stringInArray name requiredKeys) isArray=true name=name type=type}}
+      {{/if~}}
+    {{/with}}
+  {{/equal~}}
+  {{~#if (isAnyTrue (equalAny (realType schema.type) 'string,number,integer,boolean') (isNotEmpty schema.ref))}}
+  {{> struct_property ref=schema.ref maxLength=(getMaxLength maxLengthMap parentName schemaData) isRequired=(stringInArray name requiredKeys) name=name type=schema.type}}
+  {{~/if}}
+{{/each}}
+
+  {{upperFirst parentName}}({
+    {{#each schemaData as |schema name|}}
+    {{#if (stringInArray name requiredKeys)}}required {{/if}}this.{{#if (isAnyTrue (equalAny name 'is,in') (startWith name '_'))}}{{trimPrefix (upperFirst name) '_'}}{{else}}{{name}}{{/if}},
+    {{/each}}
+  });
+
+  factory {{upperFirst parentName}}.fromJson(Map<String, dynamic> json) => _${{upperFirst parentName}}FromJson(json);
+  Map<String, dynamic> toJson() => _${{upperFirst parentName}}ToJson(this);
+}

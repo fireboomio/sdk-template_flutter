@@ -1,0 +1,171 @@
+import 'package:dio/dio.dart';
+import 'package:json_annotation/json_annotation.dart';
+part 'interface.g.dart';
+
+@JsonSerializable()
+class User {
+  String? provider;
+  String? providerId;
+  String? userId;
+  String? name;
+  String? firstName;
+  String? lastName;
+  String? middleName;
+  String? nickName;
+  String? preferredUsername;
+  String? profile;
+  String? picture;
+  String? website;
+  String? email;
+  bool? emailVerified;
+  String? gender;
+  String? birthDate;
+  String? zoneInfo;
+  String? locale;
+  String? location;
+  List<String>? roles;
+  List<String>? customAttributes;
+  Map<String, dynamic>? customClaims;
+  Map<String, dynamic>? accessToken;
+  String? rawAccessToken;
+  Map<String, dynamic>? idToken;
+  String? rawIdToken;
+
+  User(
+      {this.provider,
+      this.providerId,
+      this.userId,
+      this.name,
+      this.firstName,
+      this.lastName,
+      this.middleName,
+      this.nickName,
+      this.preferredUsername,
+      this.profile,
+      this.picture,
+      this.website,
+      this.email,
+      this.emailVerified,
+      this.gender,
+      this.birthDate,
+      this.zoneInfo,
+      this.locale,
+      this.location,
+      this.roles,
+      this.customAttributes,
+      this.customClaims,
+      this.accessToken,
+      this.rawAccessToken,
+      this.idToken,
+      this.rawIdToken});
+
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+}
+
+typedef Role = String;
+
+{{#each roles}}
+const Role Role{{upperFirst this}} = "{{this}}";
+{{/each}}
+
+class OperationMetadataItem {
+  bool requiresAuthentication;
+  OperationMetadataItem({required this.requiresAuthentication});
+}
+
+class OperationMetadata {
+  Map<String, OperationMetadataItem> metadata;
+
+  OperationMetadata(this.metadata);
+}
+
+@JsonSerializable()
+class UploadResponse {
+  List<String> fileKeys;
+  UploadResponse({required this.fileKeys});
+  factory UploadResponse.fromJson(Map<String, dynamic> json) =>
+      _$UploadResponseFromJson(json);
+}
+
+class ClientResponse<ResponseData> {
+  ResponseData? data;
+  ClientResponseError? error;
+}
+
+class ClientResponseError {
+  List<GraphQLError> errors;
+  ClientResponseError({required this.errors});
+}
+
+class GraphQLError {
+  String message;
+  List<dynamic> path;
+  GraphQLError({required this.message, required this.path});
+}
+
+class OperationRequestOptions<OperationName extends String,
+    Input extends Map<String, dynamic>> {
+  OperationName operationName;
+  CancelToken? cancelToken;
+  Input? input;
+  OperationRequestOptions(
+      {required this.operationName, this.cancelToken, this.input});
+}
+
+class QueryRequestOptions<OperationName extends String,
+        Input extends Map<String, dynamic>>
+    extends OperationRequestOptions<OperationName, Input> {
+  bool? subscribeOnce;
+  QueryRequestOptions(
+      {required super.operationName,
+      this.subscribeOnce,
+      super.input,
+      super.cancelToken});
+}
+
+class FetchUserRequestOptions {
+  CancelToken? cancelToken;
+  bool? revalidate;
+}
+
+class UploadRequestOptions<ProviderName extends String,
+    ProfileName extends String> {
+  ProviderName provider;
+  List<MultipartFile> files;
+  CancelToken? cancelToken;
+  ProfileName? profile;
+  dynamic? meta;
+  UploadRequestOptions(
+      {required this.provider,
+      required this.files,
+      this.cancelToken,
+      this.meta,
+      this.profile});
+}
+
+class UploadValidationOptions {
+  /// Whether authentication is required to upload to this profile
+  ///
+  /// @default true
+  bool? requireAuthentication;
+
+  /// Maximum file size allowed per upload
+  ///
+  /// @default 10 * 1024 * 1024 (10MB)
+  int? maxAllowedUploadSizeBytes;
+
+  /// Maximum number of files allowed per upload
+  ///
+  /// @default unlimited
+  int? maxAllowedFiles;
+
+  /// List of allowed file extensions
+  ///
+  /// @default Any
+  List<String>? allowedFileExtensions;
+
+  /// List of allowed mime types
+  ///
+  /// @default Any
+  List<String>? allowedMimeTypes;
+}

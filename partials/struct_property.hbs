@@ -1,0 +1,4 @@
+{{#if (isAnyTrue (equalAny name 'is,in') (startWith name '_'))}}
+@JsonKey(name: "{{name}}")
+{{/if}}
+{{#if isArray}}List<{{/if}}{{#if type}}{{> struct_property_type type=type}}{{else}}{{upperFirst (subStringAfter ref '#/definitions/')}}{{/if}}{{#if isArray}}>{{/if}}{{#unless isRequired}}?{{/unless}} {{#if (isAnyTrue (equalAny name 'is,in') (startWith name '_'))}}{{trimPrefix (upperFirst name) '_'}}{{else}}{{name}}{{/if}};
