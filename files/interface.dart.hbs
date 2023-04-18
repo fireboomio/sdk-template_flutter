@@ -69,8 +69,8 @@ const Role Role{{upperFirst this}} = "{{this}}";
 {{/each}}
 
 class OperationMetadataItem {
-  bool requiresAuthentication;
-  OperationMetadataItem({required this.requiresAuthentication});
+  final bool requiresAuthentication;
+  const OperationMetadataItem({required this.requiresAuthentication});
 }
 
 class OperationMetadata {
@@ -117,10 +117,11 @@ class QueryRequestOptions<OperationName extends String,
     extends OperationRequestOptions<OperationName, Input> {
   bool? subscribeOnce;
   QueryRequestOptions(
-      {required super.operationName,
-      this.subscribeOnce,
-      super.input,
-      super.cancelToken});
+      {required operationName, subscribeOnce, input, cancelToken})
+      : super(
+            operationName: operationName,
+            input: input,
+            cancelToken: cancelToken);
 }
 
 class FetchUserRequestOptions {

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
-import 'interface.dart.hbs';
+import 'interface.dart';
 
 class TransformedResponse<T> {
   final T? data;
@@ -12,17 +12,21 @@ class TransformedResponse<T> {
 
 typedef Headers = Map<String, String>;
 
-class FireboomClientOptions {
+class BaseClientOptions {
+  String? baseURL;
   Headers? extraHeaders;
   OperationMetadata? operationMetadata;
-  bool csrfEnabled;
-  FireboomClientOptions(
-      {this.extraHeaders, this.operationMetadata, required this.csrfEnabled});
+  bool? csrfEnabled;
+  BaseClientOptions(
+      {this.extraHeaders,
+      this.operationMetadata,
+      this.csrfEnabled,
+      this.baseURL});
 }
 
-class FireboomClient {
-  final Dio _dio;
-  late final FireboomClientOptions _options;
+class BaseClient {
+  late final Dio _dio;
+  late final BaseClientOptions _options;
   String? _csrfToken;
 
   isAuthenticatedOperation(String operationName) {
@@ -42,12 +46,15 @@ class FireboomClient {
       if (e.response != null) {
         return TransformedResponse(null, e.response!.data);
       } else {
-        return TransformedResponse(null, e.message ?? '');
+        return TransformedResponse(null, e.message);
       }
     }
   }
 
-  FireboomClient(this._dio, this._options);
+  BaseClient(BaseClientOptions options) {
+    this._options = options;
+    this._dio = Dio(BaseOptions(baseUrl: options.baseURL!));
+  }
 
   setExtraHeaders(Headers headers) {
     _options.extraHeaders = {...?_options.extraHeaders, ...headers};
@@ -105,7 +112,7 @@ class FireboomClient {
     Headers headers = {};
 
     if (isAuthenticatedOperation(options.operationName) &&
-        _options.csrfEnabled) {
+        _options.csrfEnabled!) {
       headers['X-CSRF-Token'] = await _getCSRFToken();
     }
     return _wrapRequest(() => _dio.post(
@@ -136,7 +143,7 @@ class FireboomClient {
     _validateFiles();
     var formData = FormData.fromMap({"files": config.files});
     Headers headers = {};
-    if (validation?.requireAuthentication == true && _options.csrfEnabled) {
+    if (validation?.requireAuthentication == true && _options.csrfEnabled!) {
       headers['X-CSRF-Token'] = await _getCSRFToken();
     }
 
