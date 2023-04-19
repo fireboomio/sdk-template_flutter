@@ -1,7 +1,7 @@
+// ignore_for_file: constant_identifier_names
 import 'base_client.dart';
 import 'interface.dart';
 import 'models.dart';
-
 
 class FireboomClient extends BaseClient {
   FireboomClient(BaseClientOptions options): super(options);
@@ -18,10 +18,10 @@ class FireboomClient extends BaseClient {
 		return super.subscribe(operationName, input, cb);
 	}
 	{{#if (isNotEmpty s3Providers)}}
-	uploadFiles(UploadRequestOptions config) async {
-		// const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;
-		return super.uploadFiles(config, profile);
-	}
+	// uploadFiles(UploadRequestOptions config) async {
+  //   const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;
+	//	 return super.uploadFiles(config, profile);
+	// }
 	{{/if}}
 	// login() {
 	// 	return super.login();
@@ -34,8 +34,10 @@ class FireboomClient extends BaseClient {
   }
 }
 
+{{#with (filterOperations operations 'isQuery,!isInternal' true)}}
+{{#if (isNotEmpty this)}}
 enum Queries {
-  {{#each (filterOperations operations 'isQuery,!isInternal' true)}}
+  {{#each this}}
   {{name}}({{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
   {{/each}}
 
@@ -44,9 +46,13 @@ enum Queries {
   final OperationMetadataItem options;
   const Queries(this.input, this.data, this.options);
 }
+{{/if}}
+{{/with}}
 
+{{#with (filterOperations operations 'isMutation,!isInternal' true)}}
+{{#if (isNotEmpty this)}}
 enum Mutations {
-  {{#each (filterOperations operations 'isMutation,!isInternal' true)}}
+  {{#each this}}
   {{name}}({{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
   {{/each}}
 
@@ -55,20 +61,28 @@ enum Mutations {
   final OperationMetadataItem options;
   const Mutations(this.input, this.data, this.options);
 }
+{{/if}}
+{{/with}}
 
-enum Subscriptions {
-  {{#each (filterOperations operations 'isSubscription,!isInternal' true)}}
-  {{name}}({{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
+{{#with (filterOperations operations 'isSubscription,!isInternal' true)}}
+{{#if (isNotEmpty this)}}
+//enum Subscriptions {
+  {{#each this}}
+  //{{name}}({{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
   {{/each}}
 
-  final dynamic input;
-  final dynamic data;
-  final OperationMetadataItem options;
-  const Subscriptions(this.input, this.data, this.options);
-}
+  //final dynamic input;
+  //final dynamic data;
+  //final OperationMetadataItem options;
+  //const Subscriptions(this.input, this.data, this.options);
+//}
+{{/if}}
+{{/with}}
 
+{{#with (filterOperations operations 'isMutation,isLiveQuery,!isInternal' true)}}
+{{#if (isNotEmpty this)}}
 enum LiveQueries {
-  {{#each (filterOperations operations 'isMutation,isLiveQuery,!isInternal' true)}}
+  {{#each this}}
   {{name}}({{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
   {{/each}}
 
@@ -77,3 +91,5 @@ enum LiveQueries {
   final OperationMetadataItem options;
   const LiveQueries(this.input, this.data, this.options);
 }
+{{/if}}
+{{/with}}
