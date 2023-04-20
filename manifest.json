@@ -2,8 +2,6 @@
   "name": "Flutter SDK",
   "author": "fireboom",
   "version": "0.1.0",
-  "type": "client",
-  "clientLanguage": "dart",
   "description": "适用于 Flutter 客户端使用的 Fireboom SDK",
   "outputPath": "../case_flutter/lib/sdk",
   "enabled": true
