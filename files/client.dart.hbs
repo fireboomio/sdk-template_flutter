@@ -26,7 +26,7 @@ class FireboomClient extends BaseClient {
 	// login() {
 	// 	return super.login();
 	// }
-  factory FireboomClient.createClient(BaseClientOptions? config) {
+  factory FireboomClient.createClient({ BaseClientOptions? config }) {
     return FireboomClient(BaseClientOptions(
       baseURL: config?.baseURL ?? "{{baseURL}}",
       csrfEnabled: {{isNotEmpty authProviders}}
@@ -38,13 +38,14 @@ class FireboomClient extends BaseClient {
 {{#if (isNotEmpty this)}}
 enum Queries {
   {{#each this}}
-  {{name}}({{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
+  {{name}}("{{path}}", {{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
   {{/each}}
 
-  final dynamic input;
-  final dynamic data;
+  final String operationName;
+  final Object? input;
+  final Object data;
   final OperationMetadataItem options;
-  const Queries(this.input, this.data, this.options);
+  const Queries(this.operationName, this.input, this.data, this.options);
 }
 {{/if}}
 {{/with}}
@@ -53,13 +54,14 @@ enum Queries {
 {{#if (isNotEmpty this)}}
 enum Mutations {
   {{#each this}}
-  {{name}}({{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
+  {{name}}("{{path}}", {{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
   {{/each}}
 
-  final dynamic input;
-  final dynamic data;
+  final String operationName;
+  final Object? input;
+  final Object data;
   final OperationMetadataItem options;
-  const Mutations(this.input, this.data, this.options);
+  const Mutations(this.operationName, this.input, this.data, this.options);
 }
 {{/if}}
 {{/with}}
@@ -68,13 +70,14 @@ enum Mutations {
 {{#if (isNotEmpty this)}}
 //enum Subscriptions {
   {{#each this}}
-  //{{name}}({{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
+  //{{name}}("{{path}}", {{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
   {{/each}}
 
-  //final dynamic input;
-  //final dynamic data;
+  // final String operationName;
+  //final Object? input;
+  //final Object data;
   //final OperationMetadataItem options;
-  //const Subscriptions(this.input, this.data, this.options);
+  //const Subscriptions(this.operationName, this.input, this.data, this.options);
 //}
 {{/if}}
 {{/with}}
@@ -83,13 +86,14 @@ enum Mutations {
 {{#if (isNotEmpty this)}}
 enum LiveQueries {
   {{#each this}}
-  {{name}}({{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
+  {{name}}("{{path}}", {{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
   {{/each}}
 
-  final dynamic input;
-  final dynamic data;
+  final String operationName;
+  final Object? input;
+  final Object data;
   final OperationMetadataItem options;
-  const LiveQueries(this.input, this.data, this.options);
+  const LiveQueries(this.operationName, this.input, this.data, this.options);
 }
 {{/if}}
 {{/with}}
