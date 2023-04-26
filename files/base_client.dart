@@ -85,7 +85,7 @@ class BaseClient {
         ...{'wg_subscribe_once': 'true'}
       };
     }
-    return _wrapRequest(() => _dio.get("/operations/$options.operationName",
+    return _wrapRequest(() => _dio.get("/operations/${options.operationName}",
         queryParameters: options.input,
         cancelToken: options.cancelToken,
         options: Options(headers: {...?_options.extraHeaders})));
@@ -116,7 +116,7 @@ class BaseClient {
       headers['X-CSRF-Token'] = await _getCSRFToken();
     }
     return _wrapRequest(() => _dio.post(
-          "/operations/$options.operationName",
+          "/operations/${options.operationName}",
           data: options.input,
           cancelToken: options.cancelToken,
           options: Options(headers: {...?_options.extraHeaders, ...headers}),

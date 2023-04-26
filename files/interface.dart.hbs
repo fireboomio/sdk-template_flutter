@@ -87,20 +87,21 @@ class UploadResponse {
       _$UploadResponseFromJson(json);
 }
 
-class ClientResponse<ResponseData> {
-  ResponseData? data;
-  ClientResponseError? error;
+@JsonSerializable()
+class GraphqlResponse {
+  dynamic? data;
+  List<GraphQLError>? errors;
+  GraphqlResponse({this.data, this.errors});
+  factory GraphqlResponse.fromJson(Map<String, dynamic> json) =>
+      _$GraphqlResponseFromJson(json);
 }
 
-class ClientResponseError {
-  List<GraphQLError> errors;
-  ClientResponseError({required this.errors});
-}
-
+@JsonSerializable()
 class GraphQLError {
   String message;
-  List<dynamic> path;
-  GraphQLError({required this.message, required this.path});
+  GraphQLError({required this.message});
+  factory GraphQLError.fromJson(Map<String, dynamic> json) =>
+      _$GraphQLErrorFromJson(json);
 }
 
 class OperationRequestOptions<OperationName extends String,
