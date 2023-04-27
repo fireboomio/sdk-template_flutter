@@ -4,25 +4,7 @@ import 'package:dio/dio.dart';
 
 import 'interface.dart';
 
-class TransformedResponse<T> {
-  final T? data;
-  final String? error;
-  TransformedResponse(this.data, this.error);
-}
-
 typedef Headers = Map<String, String>;
-
-class BaseClientOptions {
-  String? baseURL;
-  Headers? extraHeaders;
-  OperationMetadata? operationMetadata;
-  bool? csrfEnabled;
-  BaseClientOptions(
-      {this.extraHeaders,
-      this.operationMetadata,
-      this.csrfEnabled,
-      this.baseURL});
-}
 
 class BaseClient {
   late final Dio _dio;
@@ -38,15 +20,20 @@ class BaseClient {
   Future<TransformedResponse> _wrapRequest<T>(
       Future<Response<T>> Function() fn) async {
     try {
-      var resp = await fn();
-      return TransformedResponse(resp.data!, null);
+      var ret = await fn();
+      var resp = GraphqlResponse.fromJson(ret.data! as Map<String, dynamic>);
+      if (resp.errors != null) {
+        return TransformedResponse(error: false, data: resp.data);
+      }
+      return TransformedResponse(
+          error: true, message: resp.errors!.map((e) => e.message).join("\n"));
     } on DioError catch (e) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx and is also not 304.
       if (e.response != null) {
-        return TransformedResponse(null, e.response!.data);
+        return TransformedResponse(error: true, message: e.response!.data);
       } else {
-        return TransformedResponse(null, e.message);
+        return TransformedResponse(error: true, message: e.message);
       }
     }
   }
@@ -78,7 +65,7 @@ class BaseClient {
   /// Query makes a GET request to the server.
   /// The method only throws an error if the request fails to reach the server or
   /// the server returns a non-200 status code. Application errors are returned as part of the response.
-  Future<TransformedResponse> query(QueryRequestOptions options) async {
+  Future<TransformedResponse> doQuery(QueryRequestOptions options) async {
     if (options.subscribeOnce ?? false) {
       options.input = {
         ...?options.input,
@@ -108,7 +95,7 @@ class BaseClient {
     return _csrfToken!;
   }
 
-  Future<TransformedResponse> mutate(OperationRequestOptions options) async {
+  Future<TransformedResponse> doMutate(OperationRequestOptions options) async {
     Headers headers = {};
 
     if (isAuthenticatedOperation(options.operationName) &&
@@ -123,7 +110,7 @@ class BaseClient {
         ));
   }
 
-  Future<void> subscribe(String operationName, Map<String, dynamic>? input,
+  Future<void> doSubscribe(String operationName, Map<String, dynamic>? input,
       void Function(TransformedResponse) cb) {
     input = input ?? {};
     input['useSSE'] = true;
@@ -158,9 +145,7 @@ class BaseClient {
     var resp = await _wrapRequest(
         () => _dio.post("/s3/${config.provider}/upload", data: formData));
 
-    if (resp.error != null) {
-      return Future.error(resp.error!);
-    }
+    return Future.error(resp.error);
     return UploadResponse.fromJson(resp.data);
   }
 
@@ -179,9 +164,7 @@ class BaseClient {
             options.revalidate ?? false ? {'revalidate': 'true'} : {},
         cancelToken: options.cancelToken,
         options: Options(headers: {...?_options.extraHeaders})));
-    if (resp.error != null) {
-      return Future.error(resp.error!);
-    }
+    return Future.error(resp.error);
     return User.fromJson(resp.data!);
   }
 }

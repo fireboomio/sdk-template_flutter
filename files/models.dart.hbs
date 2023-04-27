@@ -1,6 +1,7 @@
 // ignore_for_file: camel_case_types, non_constant_identifier_names
 
 import 'package:json_annotation/json_annotation.dart';
+import './interface.dart';
 
 part 'models.g.dart';
 
@@ -8,7 +9,7 @@ part 'models.g.dart';
 {{#if (isAnyTrue hasInput hasInternalInput (isNotEmpty inputSchema.definitions) hasInjectedInput (isNotEmpty responseSchema))}}
 	{{#if (isNotEmpty inputSchema)}}
     {{#if hasInput}}
-      {{~> struct_definition requiredKeys=inputSchema.required schemaData=inputSchema.properties parentName=(fmtSprintf '%sInput' name)}}
+      {{~> struct_definition extends="BaseInput" requiredKeys=inputSchema.required schemaData=inputSchema.properties parentName=(fmtSprintf '%sInput' name)}}
     {{/if}}
     {{#each inputSchema.definitions as |schema name|~}}
       {{#if (isAbsent onceMap (fmtSprintf 'models_%s' name) schema)}}

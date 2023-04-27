@@ -5,12 +5,38 @@ import 'models.dart';
 
 class FireboomClient extends BaseClient {
   FireboomClient(BaseClientOptions options): super(options);
-	Future<TransformedResponse> query(QueryRequestOptions options) {
-		return super.query(options);
-	}
-	Future<TransformedResponse> mutate(OperationRequestOptions options) {
-		return super.mutate(options);
-	}
+	Future<TransformedResponse<Response>>
+      query<T extends BaseOperation<BaseInput, Response>, Response>(T options) {
+    return super
+        .doQuery(QueryRequestOptions(
+            operationName: options.operationName,
+            input: options.input?.toJson()))
+        .then((ret) {
+      TransformedResponse resp = ret;
+      if (!ret.error) {
+        return TransformedResponse(
+            error: false, data: options.fromJson(ret.data));
+      }
+      return TransformedResponse(error: true, message: ret.message);
+    });
+  }
+
+  Future<TransformedResponse<Response>>
+      mutate<T extends BaseOperation<BaseInput, Response>, Response>(T options) {
+    return super
+        .doMutate(MutationRequestOptions(
+            operationName: options.operationName,
+            input: options.input?.toJson()))
+        .then((ret) {
+      TransformedResponse resp = ret;
+      if (!ret.error) {
+        return TransformedResponse(
+            error: false, data: options.fromJson(ret.data));
+      }
+      return TransformedResponse(error: true, message: ret.message);
+    });
+  }
+
 	Future<void> subscribe(
 		String operationName, Map<String, dynamic>? input,
       void Function(TransformedResponse) cb
@@ -34,66 +60,19 @@ class FireboomClient extends BaseClient {
   }
 }
 
-{{#with (filterOperations operations 'isQuery,!isInternal' true)}}
+{{#with (filterOperations operations '!isInternal' true)}}
 {{#if (isNotEmpty this)}}
-enum Queries {
-  {{#each this}}
-  {{name}}("{{path}}", {{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
-  {{/each}}
+{{#each this}}
+class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}, {{name}}ResponseData> {
+  {{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}? input;
+  {{upperFirst name}}({ this.input })
+    : super("{{path}}", OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}}), input: input );
 
-  final String operationName;
-  final Object? input;
-  final Object data;
-  final OperationMetadataItem options;
-  const Queries(this.operationName, this.input, this.data, this.options);
+  @override
+  {{name}}ResponseData fromJson(Map<String, dynamic> json) {
+    return {{name}}ResponseData.fromJson(json);
+  }
 }
-{{/if}}
-{{/with}}
-
-{{#with (filterOperations operations 'isMutation,!isInternal' true)}}
-{{#if (isNotEmpty this)}}
-enum Mutations {
-  {{#each this}}
-  {{name}}("{{path}}", {{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
-  {{/each}}
-
-  final String operationName;
-  final Object? input;
-  final Object data;
-  final OperationMetadataItem options;
-  const Mutations(this.operationName, this.input, this.data, this.options);
-}
-{{/if}}
-{{/with}}
-
-{{#with (filterOperations operations 'isSubscription,!isInternal' true)}}
-{{#if (isNotEmpty this)}}
-//enum Subscriptions {
-  {{#each this}}
-  //{{name}}("{{path}}", {{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
-  {{/each}}
-
-  // final String operationName;
-  //final Object? input;
-  //final Object data;
-  //final OperationMetadataItem options;
-  //const Subscriptions(this.operationName, this.input, this.data, this.options);
-//}
-{{/if}}
-{{/with}}
-
-{{#with (filterOperations operations 'isMutation,isLiveQuery,!isInternal' true)}}
-{{#if (isNotEmpty this)}}
-enum LiveQueries {
-  {{#each this}}
-  {{name}}("{{path}}", {{#if hasInput}}{{name}}Input{{else}}null{{/if}}, {{name}}ResponseData, OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}})){{#if @last}};{{else}},{{/if}}
-  {{/each}}
-
-  final String operationName;
-  final Object? input;
-  final Object data;
-  final OperationMetadataItem options;
-  const LiveQueries(this.operationName, this.input, this.data, this.options);
-}
+{{/each}}
 {{/if}}
 {{/with}}

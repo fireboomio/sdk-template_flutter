@@ -1,5 +1,5 @@
 @JsonSerializable()
-class {{upperFirst parentName}} {
+class {{upperFirst parentName}}{{#if extends}} extends {{extends}}{{/if}} {
 {{#each schemaData as |schema name|}}
   {{~#equal (realType schema.type) 'object'}}
   {{#with (fmtSprintf '%s_%s' (upperFirst parentName) (upperFirst name))}}

@@ -125,6 +125,16 @@ class QueryRequestOptions<OperationName extends String,
             cancelToken: cancelToken);
 }
 
+class MutationRequestOptions<OperationName extends String,
+        Input extends Map<String, dynamic>>
+    extends OperationRequestOptions<OperationName, Input> {
+  MutationRequestOptions({required operationName, input, cancelToken})
+      : super(
+            operationName: operationName,
+            input: input,
+            cancelToken: cancelToken);
+}
+
 class FetchUserRequestOptions {
   CancelToken? cancelToken;
   bool? revalidate;
@@ -170,4 +180,46 @@ class UploadValidationOptions {
   ///
   /// @default Any
   List<String>? allowedMimeTypes;
+}
+
+class TransformedResponse<T> {
+  final T? data;
+  final bool error;
+  final String? message;
+  TransformedResponse({
+    required this.error,
+    this.data,
+    this.message,
+  });
+}
+
+typedef Headers = Map<String, String>;
+
+class BaseClientOptions {
+  String? baseURL;
+  Headers? extraHeaders;
+  OperationMetadata? operationMetadata;
+  bool? csrfEnabled;
+  BaseClientOptions({
+    this.extraHeaders,
+    this.operationMetadata,
+    this.csrfEnabled,
+    this.baseURL,
+  });
+}
+
+abstract class BaseInput {
+  Map<String, dynamic> toJson();
+}
+
+class EmptyInput extends BaseInput {
+  Map<String, dynamic> toJson() => {};
+}
+
+abstract class BaseOperation<Input extends BaseInput, Response> {
+  final String operationName;
+  OperationMetadataItem metadata;
+  Input? input;
+  BaseOperation(this.operationName, this.metadata, {this.input});
+  Response fromJson(Map<String, dynamic> json);
 }
