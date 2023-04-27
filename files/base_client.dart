@@ -95,7 +95,7 @@ class BaseClient {
     return _csrfToken!;
   }
 
-  Future<TransformedResponse> doMutate(OperationRequestOptions options) async {
+  Future<TransformedResponse> doMutate(MutationRequestOptions options) async {
     Headers headers = {};
 
     if (isAuthenticatedOperation(options.operationName) &&
@@ -110,14 +110,20 @@ class BaseClient {
         ));
   }
 
-  Future<void> doSubscribe(String operationName, Map<String, dynamic>? input,
-      void Function(TransformedResponse) cb) {
-    input = input ?? {};
+  Stream<String> doSubscribe(SubscriptionRequestOptions options) async* {
+    var input = options.input ?? {};
     input['useSSE'] = true;
-    return _wrapRequest(() => _dio.get(
-          "/operations/$operationName",
-          queryParameters: input,
-        ));
+    var resp = await _dio.get<ResponseBody>(
+      "/operations/${options.operationName}",
+      cancelToken: options.cancelToken,
+      queryParameters: input,
+      options: Options(responseType: ResponseType.stream),
+    );
+    var stream = resp.data!.stream;
+    await for (var event in stream) {
+      var eventData = String.fromCharCodes(event);
+      yield eventData;
+    }
   }
 
   bool _validateFiles() {

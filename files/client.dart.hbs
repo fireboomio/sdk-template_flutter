@@ -1,4 +1,6 @@
 // ignore_for_file: constant_identifier_names
+import 'dart:convert';
+
 import 'base_client.dart';
 import 'interface.dart';
 import 'models.dart';
@@ -10,7 +12,9 @@ class FireboomClient extends BaseClient {
     return super
         .doQuery(QueryRequestOptions(
             operationName: options.operationName,
-            input: options.input?.toJson()))
+            input: options.input?.toJson(),
+            cancelToken: options.cancelToken,
+          ))
         .then((ret) {
       TransformedResponse resp = ret;
       if (!ret.error) {
@@ -26,7 +30,9 @@ class FireboomClient extends BaseClient {
     return super
         .doMutate(MutationRequestOptions(
             operationName: options.operationName,
-            input: options.input?.toJson()))
+            input: options.input?.toJson(),
+            cancelToken: options.cancelToken,
+          ))
         .then((ret) {
       TransformedResponse resp = ret;
       if (!ret.error) {
@@ -37,12 +43,24 @@ class FireboomClient extends BaseClient {
     });
   }
 
-	Future<void> subscribe(
-		String operationName, Map<String, dynamic>? input,
-      void Function(TransformedResponse) cb
-	) {
-		return super.subscribe(operationName, input, cb);
-	}
+	Stream<Response>
+      subscribe<T extends BaseOperation<BaseInput, Response>, Response>(
+          T options) async* {
+    var sub = super.doSubscribe(SubscriptionRequestOptions(
+      operationName: options.operationName,
+      input: options.input?.toJson(),
+      cancelToken: options.cancelToken,
+    ));
+    await for (var data in sub) {
+      try {
+        Map<String, dynamic> map = jsonDecode(data);
+        yield options.fromJson(map);
+      } catch (e) {
+        // do nothing
+      }
+    }
+  }
+
 	{{#if (isNotEmpty s3Providers)}}
 	// uploadFiles(UploadRequestOptions config) async {
   //   const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;

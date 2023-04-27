@@ -135,6 +135,16 @@ class MutationRequestOptions<OperationName extends String,
             cancelToken: cancelToken);
 }
 
+class SubscriptionRequestOptions<OperationName extends String,
+        Input extends Map<String, dynamic>>
+    extends OperationRequestOptions<OperationName, Input> {
+  SubscriptionRequestOptions({required operationName, input, cancelToken})
+      : super(
+            operationName: operationName,
+            input: input,
+            cancelToken: cancelToken);
+}
+
 class FetchUserRequestOptions {
   CancelToken? cancelToken;
   bool? revalidate;
@@ -220,6 +230,12 @@ abstract class BaseOperation<Input extends BaseInput, Response> {
   final String operationName;
   OperationMetadataItem metadata;
   Input? input;
-  BaseOperation(this.operationName, this.metadata, {this.input});
+  CancelToken? cancelToken;
+  BaseOperation(
+    this.operationName,
+    this.metadata, {
+    this.input,
+    this.cancelToken,
+  });
   Response fromJson(Map<String, dynamic> json);
 }
