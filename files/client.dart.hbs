@@ -17,7 +17,6 @@ class FireboomClient extends BaseClient {
             cancelToken: options.cancelToken,
           ))
         .then((ret) {
-      TransformedResponse resp = ret;
       if (!ret.error) {
         return TransformedResponse(
             error: false, data: options.fromJson(ret.data));
