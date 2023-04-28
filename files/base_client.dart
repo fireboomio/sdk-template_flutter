@@ -136,8 +136,8 @@ class BaseClient {
     return true;
   }
 
-  Future<UploadResponse> uploadFiles(
-      UploadRequestOptions config, UploadValidationOptions? validation) async {
+  Future<UploadResponse> uploadFiles(UploadRequestOptions config,
+      {UploadValidationOptions? validation}) async {
     _validateFiles();
     var formData = FormData.fromMap({"files": config.files});
     Headers headers = {};
