@@ -43,7 +43,24 @@ class FireboomClient extends BaseClient {
     });
   }
 
-	Stream<Response>
+	// SSE流转换器
+  StreamTransformer<String, Response>
+      _sseTransformer<T extends BaseOperation<BaseInput, Response>, Response>(
+              T options) =>
+          StreamTransformer<String, Response>.fromHandlers(
+              handleData: (response, sink) async {
+            try {
+              Map<String, dynamic> map = jsonDecode(response);
+              if (map["data"] != null) {
+                var result = options.fromJson(map["data"]);
+                sink.add(result);
+              }
+            } catch (e) {
+              // do nothing
+            }
+          });
+
+  Stream<Response>
       subscribe<T extends BaseOperation<BaseInput, Response>, Response>(
           T options) async* {
     var sub = super.doSubscribe(SubscriptionRequestOptions(
@@ -51,14 +68,10 @@ class FireboomClient extends BaseClient {
       input: options.input?.toJson(),
       cancelToken: options.cancelToken,
     ));
-    await for (var data in sub) {
-      try {
-        Map<String, dynamic> map = jsonDecode(data);
-        yield options.fromJson(map);
-      } catch (e) {
-        // do nothing
-      }
-    }
+    // 使用转换器转换SSE响应流
+    var transformSub = sub.transform<Response>(this._sseTransformer(options));
+
+    yield* transformSub;
   }
 
 	{{#if (isNotEmpty s3Providers)}}

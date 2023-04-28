@@ -22,7 +22,7 @@ class BaseClient {
     try {
       var ret = await fn();
       var resp = GraphqlResponse.fromJson(ret.data! as Map<String, dynamic>);
-      if (resp.errors != null) {
+      if (resp.errors == null) {
         return TransformedResponse(error: false, data: resp.data);
       }
       return TransformedResponse(
@@ -41,6 +41,7 @@ class BaseClient {
   BaseClient(BaseClientOptions options) {
     this._options = options;
     this._dio = Dio(BaseOptions(baseUrl: options.baseURL!));
+    this._dio.interceptors.add(NullParamInterceptor());
   }
 
   setExtraHeaders(Headers headers) {
@@ -113,16 +114,20 @@ class BaseClient {
   Stream<String> doSubscribe(SubscriptionRequestOptions options) async* {
     var input = options.input ?? {};
     input['useSSE'] = true;
-    var resp = await _dio.get<ResponseBody>(
-      "/operations/${options.operationName}",
-      cancelToken: options.cancelToken,
-      queryParameters: input,
-      options: Options(responseType: ResponseType.stream),
-    );
-    var stream = resp.data!.stream;
-    await for (var event in stream) {
-      var eventData = String.fromCharCodes(event);
-      yield eventData;
+    try {
+      var resp = await _dio.get<ResponseBody>(
+        "/operations/${options.operationName}",
+        cancelToken: options.cancelToken,
+        queryParameters: input,
+        options: Options(responseType: ResponseType.stream),
+      );
+      var stream = resp.data!.stream;
+      await for (var event in stream) {
+        var eventData = String.fromCharCodes(event);
+        yield eventData;
+      }
+    } catch (e) {
+      throw e;
     }
   }
 
@@ -175,7 +180,12 @@ class BaseClient {
   }
 }
 
-Dio createClient(String baseUrl) {
-  BaseOptions options = BaseOptions(baseUrl: baseUrl);
-  return Dio(options);
+class NullParamInterceptor extends Interceptor {
+  @override
+  Future onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
+    // 移除值为null的查询参数
+    options.queryParameters.removeWhere((key, value) => value == null);
+    return super.onRequest(options, handler);
+  }
 }
