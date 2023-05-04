@@ -169,11 +169,11 @@ class BaseClient {
     unsetAuthorization();
   }
 
-  Future<User> fetchUser(FetchUserRequestOptions options) async {
+  Future<User> fetchUser({FetchUserRequestOptions? options}) async {
     var resp = await _wrapRequest(() => _dio.get("/auth/user",
         queryParameters:
-            options.revalidate ?? false ? {'revalidate': 'true'} : {},
-        cancelToken: options.cancelToken,
+            options?.revalidate ?? false ? {'revalidate': 'true'} : {},
+        cancelToken: options?.cancelToken,
         options: Options(headers: {...?_options.extraHeaders})));
     return Future.error(resp.error);
     return User.fromJson(resp.data!);
