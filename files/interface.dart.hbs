@@ -80,14 +80,6 @@ class OperationMetadata {
 }
 
 @JsonSerializable()
-class UploadResponse {
-  List<String> fileKeys;
-  UploadResponse({required this.fileKeys});
-  factory UploadResponse.fromJson(Map<String, dynamic> json) =>
-      _$UploadResponseFromJson(json);
-}
-
-@JsonSerializable()
 class GraphqlResponse {
   dynamic? data;
   List<GraphQLError>? errors;

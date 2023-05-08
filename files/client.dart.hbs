@@ -6,6 +6,18 @@ import 'base_client.dart';
 import 'interface.dart';
 import 'models.dart';
 
+{{#if (isNotEmpty s3Providers)}}
+const s3Providers = {
+{{#each s3Providers}}
+  '{{name}}': {
+    'useSSL': {{useSSL}},
+    'bucketName': '{{bucketName.staticVariableContent}}',
+    'endpoint': '{{endpoint.staticVariableContent}}',
+  },
+{{/each}}
+};
+{{/if}}
+
 class FireboomClient extends BaseClient {
   FireboomClient(BaseClientOptions options): super(options);
 	Future<TransformedResponse<Response>>
@@ -74,11 +86,23 @@ class FireboomClient extends BaseClient {
   }
 
 	{{#if (isNotEmpty s3Providers)}}
-	// uploadFiles(UploadRequestOptions config) async {
-  //   const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;
-	//	 return super.uploadFiles(config, profile);
-	// }
+	Future<TransformedResponse<List<String>>> uploadFiles(
+      UploadRequestOptions config) async {
+    // const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;
+    var resp = await super.doUploadFiles(config);
+    if (!resp.error) {
+      var s3Config = s3Providers[config.provider];
+      return TransformedResponse(
+          error: false,
+          data: resp.data!
+              .map((key) =>
+                  '${s3Config!['useSSL'] == true ? 'https' : 'http'}://${s3Config['bucketName']}.${s3Config['endpoint']}/${key}')
+              .toList());
+    }
+    return resp;
+  }
 	{{/if}}
+
 	// login() {
 	// 	return super.login();
 	// }

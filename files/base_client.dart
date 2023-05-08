@@ -30,11 +30,14 @@ class BaseClient {
     } on DioError catch (e) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx and is also not 304.
+      var msg = '';
       if (e.response != null) {
-        return TransformedResponse(error: true, message: e.response!.data);
-      } else {
-        return TransformedResponse(error: true, message: e.message);
+        msg = e.response!.data ?? e.response!.statusMessage;
       }
+      if (msg.isEmpty) {
+        msg = e.message ?? '发生错误';
+      }
+      return TransformedResponse(error: true, message: msg);
     }
   }
 
@@ -136,7 +139,8 @@ class BaseClient {
     return true;
   }
 
-  Future<UploadResponse> uploadFiles(UploadRequestOptions config,
+  Future<TransformedResponse<List<String>>> doUploadFiles(
+      UploadRequestOptions config,
       {UploadValidationOptions? validation}) async {
     _validateFiles();
     var formData = FormData.fromMap({"files": config.files});
@@ -153,11 +157,32 @@ class BaseClient {
       headers['X-Metadata'] = jsonEncode(config.meta!);
     }
 
-    var resp = await _wrapRequest(
-        () => _dio.post("/s3/${config.provider}/upload", data: formData));
-
-    return Future.error(resp.error);
-    return UploadResponse.fromJson(resp.data);
+    try {
+      var ret = await _dio.post(
+        "/s3/${config.provider}/upload",
+        data: formData,
+        options: Options(
+          headers: headers,
+        ),
+      );
+      List<String> list = [];
+      for (var i = 0; i < ret.data.length; i++) {
+        list.add(ret.data[i]['key']);
+      }
+      return TransformedResponse(
+        error: false,
+        data: list,
+      );
+    } on DioError catch (e) {
+      var msg = '';
+      if (e.response != null) {
+        msg = e.response!.data ?? e.response!.statusMessage;
+      }
+      if (msg.isEmpty) {
+        msg = e.message ?? '发生错误';
+      }
+      return TransformedResponse(error: true, message: msg);
+    }
   }
 
   Future<bool> login(String authProviderID, username, password) {
