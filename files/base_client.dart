@@ -45,6 +45,14 @@ class BaseClient {
     this._options = options;
     this._dio = Dio(BaseOptions(baseUrl: options.baseURL!));
     this._dio.interceptors.add(NullParamInterceptor());
+    // (this._dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
+    //     (Uri) {
+    //   Uri.findProxy = (url) {
+    //     return 'PROXY 127.0.0.1:8888';
+    //   };
+
+    //   return null;
+    // };
   }
 
   setExtraHeaders(Headers headers) {
