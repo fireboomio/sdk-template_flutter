@@ -122,7 +122,9 @@ class BaseClient {
         "/operations/${options.operationName}",
         cancelToken: options.cancelToken,
         queryParameters: input,
-        options: Options(responseType: ResponseType.stream),
+        options: Options(
+            responseType: ResponseType.stream,
+            headers: {...?_options.extraHeaders}),
       );
       var stream = resp.data!.stream;
       await for (var event in stream) {
@@ -162,7 +164,7 @@ class BaseClient {
         "/s3/${config.provider}/upload",
         data: formData,
         options: Options(
-          headers: headers,
+          headers: {...?_options.extraHeaders, ...headers},
         ),
       );
       List<String> list = [];
@@ -194,14 +196,25 @@ class BaseClient {
     unsetAuthorization();
   }
 
-  Future<User> fetchUser({FetchUserRequestOptions? options}) async {
-    var resp = await _wrapRequest(() => _dio.get("/auth/user",
+  Future<User?> fetchUser({FetchUserRequestOptions? options}) async {
+    try {
+      var resp = await _dio.get(
+        "/auth/user",
         queryParameters:
             options?.revalidate ?? false ? {'revalidate': 'true'} : {},
         cancelToken: options?.cancelToken,
-        options: Options(headers: {...?_options.extraHeaders})));
-    return Future.error(resp.error);
-    return User.fromJson(resp.data!);
+        options: Options(
+          headers: {...?_options.extraHeaders},
+        ),
+      );
+      if (resp.data != null) {
+        return User.fromJson(resp.data!);
+      }
+      return null;
+    } on DioError catch (e) {
+      print(e);
+      return null;
+    }
   }
 }
 
