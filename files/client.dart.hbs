@@ -23,12 +23,12 @@ class FireboomClient extends BaseClient {
 	Future<TransformedResponse<Response>>
       query<T extends BaseOperation<BaseInput, Response>, Response>(T options) {
     return super
-        .doQuery(QueryRequestOptions(
-            operationName: options.operationName,
-            input: options.input?.toJson(),
-            cancelToken: options.cancelToken,
-          ))
-        .then((ret) {
+      .doQuery(QueryRequestOptions(
+          operationName: options.operationName,
+          input: options.input?.toJson(),
+          cancelToken: options.cancelToken,
+        ))
+      .then((ret) {
       if (!ret.error) {
         return TransformedResponse(
             error: false, data: options.fromJson(ret.data));
@@ -54,7 +54,7 @@ class FireboomClient extends BaseClient {
     });
   }
 
-	// SSE流转换器
+  // SSE流转换器
   StreamTransformer<String, Response>
       _sseTransformer<T extends BaseOperation<BaseInput, Response>, Response>(
               T options) =>
@@ -106,11 +106,16 @@ class FireboomClient extends BaseClient {
 	// login() {
 	// 	return super.login();
 	// }
-  factory FireboomClient.createClient({ BaseClientOptions? config }) {
-    return FireboomClient(BaseClientOptions(
-      baseURL: config?.baseURL ?? "{{baseURL}}",
-      csrfEnabled: {{isNotEmpty authProviders}}
-      ));
+  factory FireboomClient.createClient({BaseClientOptions? config}) {
+    var client = FireboomClient(
+      BaseClientOptions(
+        baseURL: config?.baseURL ?? "http://localhost:9991",
+        csrfEnabled: true,
+        onInit: config?.onInit,
+      ),
+    );
+
+    return client;
   }
 }
 

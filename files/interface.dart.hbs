@@ -202,11 +202,13 @@ class BaseClientOptions {
   Headers? extraHeaders;
   OperationMetadata? operationMetadata;
   bool? csrfEnabled;
+  void Function(Dio dio)? onInit;
   BaseClientOptions({
     this.extraHeaders,
     this.operationMetadata,
     this.csrfEnabled,
     this.baseURL,
+    this.onInit,
   });
 }
 
