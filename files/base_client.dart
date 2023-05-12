@@ -139,7 +139,7 @@ class BaseClient {
       );
       var stream = resp.data!.stream;
       await for (var event in stream) {
-        var eventData = String.fromCharCodes(event);
+        var eventData = utf8.decode(event);
         yield eventData;
       }
     } catch (e) {
