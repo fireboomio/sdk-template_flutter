@@ -32,12 +32,21 @@ class BaseClient {
       // that falls out of the range of 2xx and is also not 304.
       var msg = '';
       if (e.response != null) {
-        msg = e.response!.data ?? e.response!.statusMessage;
+        var data = e.response!.data;
+        if (data is Map<String, dynamic>) {
+          msg = data['message'];
+        } else if (data is String) {
+          msg = data;
+        }
+        msg = data ?? e.response!.statusMessage;
       }
       if (msg.isEmpty) {
         msg = e.message ?? '发生错误';
       }
-      return TransformedResponse(error: true, message: msg);
+      return TransformedResponse(
+        error: true,
+        message: msg.replaceAll('hooks pipeline failed:', '').trim(),
+      );
     }
   }
 
