@@ -26,7 +26,12 @@ class BaseClient {
         return TransformedResponse(error: false, data: resp.data);
       }
       return TransformedResponse(
-          error: true, message: resp.errors!.map((e) => e.message).join("\n"));
+          error: true,
+          message: resp.errors!
+              .map((e) => e.message)
+              .join("\n")
+              .replaceAll('hooks pipeline failed:', '')
+              .trim());
     } on DioError catch (e) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx and is also not 304.
