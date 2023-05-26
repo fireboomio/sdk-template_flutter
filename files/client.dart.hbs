@@ -31,9 +31,16 @@ class FireboomClient extends BaseClient {
       .then((ret) {
       if (!ret.error) {
         return TransformedResponse(
-            error: false, data: options.fromJson(ret.data));
+          error: false,
+          data: options.fromJson(ret.data),
+          statusCode: ret.statusCode,
+        );
       }
-      return TransformedResponse(error: true, message: ret.message);
+      return TransformedResponse(
+        error: true,
+        message: ret.message,
+        statusCode: ret.statusCode,
+      );
     });
   }
 
@@ -48,9 +55,16 @@ class FireboomClient extends BaseClient {
         .then((ret) {
       if (!ret.error) {
         return TransformedResponse(
-            error: false, data: options.fromJson(ret.data));
+          error: false,
+          data: options.fromJson(ret.data),
+          statusCode: ret.statusCode,
+        );
       }
-      return TransformedResponse(error: true, message: ret.message);
+      return TransformedResponse(
+        error: true,
+        message: ret.message,
+        statusCode: ret.statusCode,
+      );
     });
   }
 
@@ -93,11 +107,13 @@ class FireboomClient extends BaseClient {
     if (!resp.error) {
       var s3Config = s3Providers[config.provider];
       return TransformedResponse(
-          error: false,
-          data: resp.data!
-              .map((key) =>
-                  '${s3Config!['useSSL'] == true ? 'https' : 'http'}://${s3Config['bucketName']}.${s3Config['endpoint']}/${key}')
-              .toList());
+        error: false,
+        data: resp.data!
+            .map((key) =>
+                '${s3Config!['useSSL'] == true ? 'https' : 'http'}://${s3Config['bucketName']}.${s3Config['endpoint']}/${key}')
+            .toList(),
+        statusCode: resp.statusCode,
+      );
     }
     return resp;
   }

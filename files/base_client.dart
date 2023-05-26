@@ -23,10 +23,15 @@ class BaseClient {
       var ret = await fn();
       var resp = GraphqlResponse.fromJson(ret.data! as Map<String, dynamic>);
       if (resp.errors == null) {
-        return TransformedResponse(error: false, data: resp.data);
+        return TransformedResponse(
+          error: false,
+          data: resp.data,
+          statusCode: ret.statusCode,
+        );
       }
       return TransformedResponse(
           error: true,
+          statusCode: ret.statusCode,
           message: resp.errors!
               .map((e) => e.message)
               .join("\n")
@@ -50,6 +55,7 @@ class BaseClient {
       }
       return TransformedResponse(
         error: true,
+        statusCode: e.response?.statusCode,
         message: msg.replaceAll('hooks pipeline failed:', '').trim(),
       );
     }
@@ -203,6 +209,7 @@ class BaseClient {
       return TransformedResponse(
         error: false,
         data: list,
+        statusCode: ret.statusCode,
       );
     } on DioError catch (e) {
       var msg = '';
@@ -212,7 +219,11 @@ class BaseClient {
       if (msg.isEmpty) {
         msg = e.message ?? '发生错误';
       }
-      return TransformedResponse(error: true, message: msg);
+      return TransformedResponse(
+        error: true,
+        message: msg,
+        statusCode: e.response?.statusCode,
+      );
     }
   }
 

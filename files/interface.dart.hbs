@@ -189,12 +189,14 @@ class UploadValidationOptions {
 
 class TransformedResponse<T> {
   final T? data;
+  final int? statusCode;
   final bool error;
   final String? message;
   TransformedResponse({
     required this.error,
     this.data,
     this.message,
+    this.statusCode,
   });
 }
 
