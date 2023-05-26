@@ -81,7 +81,7 @@ class OperationMetadata {
 
 @JsonSerializable()
 class GraphqlResponse {
-  dynamic? data;
+  dynamic data;
   List<GraphQLError>? errors;
   GraphqlResponse({this.data, this.errors});
   factory GraphqlResponse.fromJson(Map<String, dynamic> json) =>
@@ -146,15 +146,18 @@ class UploadRequestOptions<ProviderName extends String,
     ProfileName extends String> {
   ProviderName provider;
   List<MultipartFile> files;
+  String? directory;
   CancelToken? cancelToken;
   ProfileName? profile;
-  dynamic? meta;
-  UploadRequestOptions(
-      {required this.provider,
-      required this.files,
-      this.cancelToken,
-      this.meta,
-      this.profile});
+  dynamic meta;
+  UploadRequestOptions({
+    required this.provider,
+    required this.files,
+    this.directory,
+    this.cancelToken,
+    this.meta,
+    this.profile,
+  });
 }
 
 class UploadValidationOptions {

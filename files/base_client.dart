@@ -187,6 +187,10 @@ class BaseClient {
     try {
       var ret = await _dio.post(
         "/s3/${config.provider}/upload",
+        queryParameters:
+            config.directory != null && config.directory!.isNotEmpty
+                ? {"directory": config.directory!}
+                : null,
         data: formData,
         options: Options(
           headers: {...?_options.extraHeaders, ...headers},
