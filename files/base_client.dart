@@ -256,6 +256,19 @@ class BaseClient {
       return null;
     }
   }
+
+  Map<String, dynamic>? removeNull(Map<String, dynamic>? map) {
+    if (map != null) {
+      map.removeWhere((key, value) {
+        if (value is Map<String, dynamic>) {
+          this.removeNull(value);
+          return false;
+        }
+        return value == null;
+      });
+    }
+    return map;
+  }
 }
 
 class NullParamInterceptor extends Interceptor {

@@ -21,11 +21,13 @@ const s3Providers = {
 class FireboomClient extends BaseClient {
   FireboomClient(BaseClientOptions options): super(options);
 	Future<TransformedResponse<Response>>
-      query<T extends BaseOperation<BaseInput, Response>, Response>(T options) {
+    query<T extends BaseOperation<BaseInput, Response>, Response>(T options, 
+    { Map<String, dynamic>? mapInput, }
+  ) {
     return super
       .doQuery(QueryRequestOptions(
           operationName: options.operationName,
-          input: options.mapInput ?? options.input?.toJson(),
+          input: mapInput ?? options.input?.toJson(),
           cancelToken: options.cancelToken,
         ))
       .then((ret) {
@@ -45,14 +47,17 @@ class FireboomClient extends BaseClient {
   }
 
   Future<TransformedResponse<Response>>
-      mutate<T extends BaseOperation<BaseInput, Response>, Response>(T options) {
+    mutate<T extends BaseOperation<BaseInput, Response>, Response>(
+    T options,  
+    { Map<String, dynamic>? mapInput, bool? removeNull, }
+  ) {
+    var input = mapInput ?? options.input?.toJson();
     return super
         .doMutate(MutationRequestOptions(
-            operationName: options.operationName,
-            input: options.mapInput ?? options.input?.toJson(),
-            cancelToken: options.cancelToken,
-          ))
-        .then((ret) {
+      operationName: options.operationName,
+      input: removeNull == true ? super.removeNull(input) : input,
+      cancelToken: options.cancelToken,
+    )).then((ret) {
       if (!ret.error) {
         return TransformedResponse(
           error: false,
@@ -85,12 +90,13 @@ class FireboomClient extends BaseClient {
             }
           });
 
-  Stream<Response>
-      subscribe<T extends BaseOperation<BaseInput, Response>, Response>(
-          T options) async* {
+  Stream<Response> subscribe<T extends BaseOperation<BaseInput, Response>, Response>(
+    T options, 
+    { Map<String, dynamic>? mapInput, }
+  ) async* {
     var sub = super.doSubscribe(SubscriptionRequestOptions(
       operationName: options.operationName,
-      input: options.mapInput ?? options.input?.toJson(),
+      input: mapInput ?? options.input?.toJson(),
       cancelToken: options.cancelToken,
     ));
     // 使用转换器转换SSE响应流
