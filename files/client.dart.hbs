@@ -25,7 +25,7 @@ class FireboomClient extends BaseClient {
     return super
       .doQuery(QueryRequestOptions(
           operationName: options.operationName,
-          input: options.input?.toJson(),
+          input: options.mapInput ?? options.input?.toJson(),
           cancelToken: options.cancelToken,
         ))
       .then((ret) {
@@ -49,7 +49,7 @@ class FireboomClient extends BaseClient {
     return super
         .doMutate(MutationRequestOptions(
             operationName: options.operationName,
-            input: options.input?.toJson(),
+            input: options.mapInput ?? options.input?.toJson(),
             cancelToken: options.cancelToken,
           ))
         .then((ret) {
@@ -90,7 +90,7 @@ class FireboomClient extends BaseClient {
           T options) async* {
     var sub = super.doSubscribe(SubscriptionRequestOptions(
       operationName: options.operationName,
-      input: options.input?.toJson(),
+      input: options.mapInput ?? options.input?.toJson(),
       cancelToken: options.cancelToken,
     ));
     // 使用转换器转换SSE响应流

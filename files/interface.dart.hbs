@@ -229,11 +229,13 @@ abstract class BaseOperation<Input extends BaseInput, Response> {
   final String operationName;
   OperationMetadataItem metadata;
   Input? input;
+  Map<String, dynamic>? mapInput;
   CancelToken? cancelToken;
   BaseOperation(
     this.operationName,
     this.metadata, {
     this.input,
+    this.mapInput,
     this.cancelToken,
   });
   Response fromJson(Map<String, dynamic> json);
