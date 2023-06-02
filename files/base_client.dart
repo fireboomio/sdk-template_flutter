@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 
 import 'interface.dart';
 
@@ -167,15 +169,61 @@ class BaseClient {
     }
   }
 
-  bool _validateFiles() {
+  bool _validateFiles(
+    UploadRequestOptions config,
+    UploadValidationOptions? validation,
+  ) {
+    if (validation?.maxAllowedFiles != null &&
+        config.files.length > validation!.maxAllowedFiles!) {
+      throw Exception(
+          'uploading ${config.files.length} exceeds the maximum allowed (${validation.maxAllowedFiles})');
+    }
+    for (var file in config.files) {
+      if (validation?.maxAllowedUploadSizeBytes != null &&
+          file.length > validation!.maxAllowedUploadSizeBytes!) {
+        throw Exception(
+            'file ${file.filename} with size ${file.length} exceeds the maximum allowed (${validation.maxAllowedUploadSizeBytes})');
+      }
+      if (validation?.allowedFileExtensions != null) {
+        var ext = path.extension(file.filename!).toLowerCase();
+        if (ext.isEmpty) {
+          throw Exception(
+              'file ${file.filename} with no extension is not allowed');
+        }
+        if (validation!.allowedFileExtensions!
+                .indexWhere((allowedExt) => allowedExt.toLowerCase() == ext) <
+            0) {
+          throw Exception(
+              'file ${file.filename} with extension ${ext} is not allowed');
+        }
+      }
+      if (validation?.allowedMimeTypes != null) {
+        if (validation!.allowedMimeTypes!.indexWhere((mt) {
+              var allowedType = mt.toLowerCase();
+              var fileMimeType = file.contentType.toString().toLowerCase();
+              if (fileMimeType == allowedType) {
+                return true;
+              }
+              // Try wildcard match. This is a bit brittle but it should be fine
+              // as long as profile?.allowedMimeTypes contains only valid entries
+              return RegExp(allowedType.replaceAll('*', '.*'))
+                  .hasMatch(fileMimeType);
+            }) <
+            0) {
+          throw new Exception(
+              'file ${file.filename} with MIME type ${file.contentType} is not allowed');
+        }
+      }
+    }
     // TODO
     return true;
   }
 
   Future<TransformedResponse<List<String>>> doUploadFiles(
-      UploadRequestOptions config,
-      {UploadValidationOptions? validation}) async {
-    _validateFiles();
+    UploadRequestOptions config, {
+    UploadValidationOptions? validation,
+  }) async {
+    _validateFiles(config, validation);
     var formData = FormData.fromMap({"files": config.files});
     Headers headers = {};
     if (validation?.requireAuthentication == true && _options.csrfEnabled!) {
@@ -227,15 +275,24 @@ class BaseClient {
     }
   }
 
+  /**
+   * not implement for flutter sdk
+   */
   Future<bool> login(String authProviderID, username, password) {
     // TODO
     return Future.value(true);
   }
 
+  /**
+   * logoutOpenidConnectProvider has no effect currently
+   */
   logout(bool logoutOpenidConnectProvider) {
     unsetAuthorization();
   }
 
+  /**
+   * fetch user info from oidc
+   */
   Future<User?> fetchUser({FetchUserRequestOptions? options}) async {
     try {
       var resp = await _dio.get(
@@ -257,6 +314,10 @@ class BaseClient {
     }
   }
 
+  /**
+   * method to remove null key from a map value
+   */
+  @protected
   Map<String, dynamic>? removeNull(Map<String, dynamic>? map) {
     if (map != null) {
       map.removeWhere((key, value) {
@@ -275,7 +336,7 @@ class NullParamInterceptor extends Interceptor {
   @override
   Future onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    // 移除值为null的查询参数
+    // remove null queries
     options.queryParameters.removeWhere((key, value) => value == null);
     return super.onRequest(options, handler);
   }
