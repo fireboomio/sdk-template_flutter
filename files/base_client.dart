@@ -169,7 +169,7 @@ class BaseClient {
     }
   }
 
-  bool _validateFiles(
+  _validateFiles(
     UploadRequestOptions config,
     UploadValidationOptions? validation,
   ) {
@@ -215,15 +215,20 @@ class BaseClient {
         }
       }
     }
-    // TODO
-    return true;
   }
 
   Future<TransformedResponse<List<String>>> doUploadFiles(
     UploadRequestOptions config, {
     UploadValidationOptions? validation,
   }) async {
-    _validateFiles(config, validation);
+    try {
+      _validateFiles(config, validation);
+    } on Exception catch (e) {
+      return TransformedResponse(
+        error: true,
+        message: e.toString(),
+      );
+    }
     var formData = FormData.fromMap({"files": config.files});
     Headers headers = {};
     if (validation?.requireAuthentication == true && _options.csrfEnabled!) {
