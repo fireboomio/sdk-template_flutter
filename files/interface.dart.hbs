@@ -101,40 +101,45 @@ class OperationRequestOptions<OperationName extends String,
   OperationName operationName;
   CancelToken? cancelToken;
   Input? input;
-  OperationRequestOptions(
-      {required this.operationName, this.cancelToken, this.input});
+  OperationRequestOptions({
+    required this.operationName,
+    this.cancelToken,
+    this.input,
+  });
 }
 
 class QueryRequestOptions<OperationName extends String,
         Input extends Map<String, dynamic>>
     extends OperationRequestOptions<OperationName, Input> {
   bool? subscribeOnce;
-  QueryRequestOptions(
-      {required operationName, subscribeOnce, input, cancelToken})
-      : super(
-            operationName: operationName,
-            input: input,
-            cancelToken: cancelToken);
+  bool? useJson;
+  QueryRequestOptions({
+    required super.operationName,
+    this.subscribeOnce,
+    super.input,
+    super.cancelToken,
+    this.useJson,
+  });
 }
 
 class MutationRequestOptions<OperationName extends String,
         Input extends Map<String, dynamic>>
     extends OperationRequestOptions<OperationName, Input> {
-  MutationRequestOptions({required operationName, input, cancelToken})
-      : super(
-            operationName: operationName,
-            input: input,
-            cancelToken: cancelToken);
+  MutationRequestOptions({
+    required super.operationName,
+    super.input,
+    super.cancelToken,
+  });
 }
 
 class SubscriptionRequestOptions<OperationName extends String,
         Input extends Map<String, dynamic>>
     extends OperationRequestOptions<OperationName, Input> {
-  SubscriptionRequestOptions({required operationName, input, cancelToken})
-      : super(
-            operationName: operationName,
-            input: input,
-            cancelToken: cancelToken);
+  SubscriptionRequestOptions({
+    required super.operationName,
+    super.input,
+    super.cancelToken,
+  });
 }
 
 class FetchUserRequestOptions {

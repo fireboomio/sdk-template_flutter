@@ -109,6 +109,9 @@ class BaseClient {
         ...{'wg_subscribe_once': 'true'}
       };
     }
+    if (options.useJson == true) {
+      options.input = {'wg_variables': jsonEncode(options.input)};
+    }
     return _wrapRequest(() => _dio.get("/operations/${options.operationName}",
         queryParameters: options.input,
         cancelToken: options.cancelToken,

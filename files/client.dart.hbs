@@ -22,13 +22,14 @@ class FireboomClient extends BaseClient {
   FireboomClient(BaseClientOptions options): super(options);
 	Future<TransformedResponse<Response>>
     query<T extends BaseOperation<BaseInput, Response>, Response>(T options, 
-    { Map<String, dynamic>? mapInput, }
+    { Map<String, dynamic>? mapInput, bool? useJson, }
   ) {
     return super
       .doQuery(QueryRequestOptions(
           operationName: options.operationName,
           input: mapInput ?? options.input?.toJson(),
           cancelToken: options.cancelToken,
+          useJson: useJson,
         ))
       .then((ret) {
       if (!ret.error) {
