@@ -1,0 +1,3 @@
+{{#if (isAnyTrue (equalAny name 'is,in') (startWith name '_'))~}}
+@JsonKey(name: "{{name}}")
+{{/if}}
