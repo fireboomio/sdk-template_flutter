@@ -23,11 +23,11 @@ class {{upperFirst (joinString '_' documentPath)}}{{#equal root 'Input'}} extend
     {{~#equal typeName 'boolean'}}bool{{/equal~}}
     {{~#equal typeName ''}}dynamic{{/equal~}}
     {{~/if}}
-  {{~/if}}{{#if isArray}}>{{~/if}}{{#unless (isAnyTrue (isAllTrue (equalAny root 'ResponseData') isArray) (isAllTrue required (invertBool (equalAny root 'ResponseData'))))}}?{{/unless}} {{>keywords_name name=name}};
+  {{~/if}}{{#if isArray}}>{{~/if}}{{#unless (isAllTrue required (equalAny root 'Input'))}}?{{/unless}} {{>keywords_name name=name}};
   {{/each}}
   {{upperFirst (joinString '_' documentPath)}}({{#if fields}}{
     {{#each fields}}
-    {{#if (isAnyTrue (isAllTrue (equalAny root 'ResponseData') isArray) (isAllTrue required (invertBool (equalAny root 'ResponseData'))))}}required {{/if}}this.{{>keywords_name name=name}},
+    {{#if (isAllTrue required (equalAny root 'Input'))}}required {{/if}}this.{{>keywords_name name=name}},
     {{/each}}
   }{{/if}});
 
@@ -46,6 +46,17 @@ enum {{upperFirst name}} {
 
   final String value;
   const {{upperFirst name}}(this.value);
+
+  factory {{upperFirst name}}.fromValue(String value) {
+    switch (value) {
+      {{#each values}}
+      case '{{this}}':
+        return {{upperFirst name}}.{{upperFirst this}};
+      {{/each}}
+      default:
+        throw ArgumentError('Invalid value: $value');
+    }
+  }
 }
 
 {{/each}}
