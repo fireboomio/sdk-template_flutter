@@ -103,7 +103,7 @@ class BaseClient {
   /// The method only throws an error if the request fails to reach the server or
   /// the server returns a non-200 status code. Application errors are returned as part of the response.
   Future<TransformedResponse> doQuery(QueryRequestOptions options) async {
-    if (options.subscribeOnce ?? false) {
+    if (options.subscribeOnce == true) {
       options.input = {
         ...?options.input,
         ...{'wg_subscribe_once': 'true'}
