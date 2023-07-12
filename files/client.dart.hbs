@@ -147,7 +147,7 @@ class FireboomClient extends BaseClient {
 {{#each this}}
 class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}, {{name}}ResponseData> {
   {{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}? input;
-  {{upperFirst name}}({ this.input })
+  {{upperFirst name}}({ this.input, super.cancelToken })
     : super("{{path}}", OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}}), input: input );
 
   @override
