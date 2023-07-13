@@ -20,45 +20,41 @@ const s3Providers = {
 
 class FireboomClient extends BaseClient {
   FireboomClient(BaseClientOptions options): super(options);
-	Future<TransformedResponse<Response>>
-    query<T extends BaseOperation<BaseInput, Response>, Response>(T options, 
-    { Map<String, dynamic>? mapInput, bool? useJson, }
-  ) {
+	Future<TransformedResponse<Response>> query<T extends BaseOperation<BaseInput, Response>, Response>(T options) {
     return super
-      .doQuery(QueryRequestOptions(
+      .doQuery(
+        QueryRequestOptions(
           operationName: options.operationName,
-          input: mapInput ?? options.input?.toJson(),
+          input: options.mapInput ?? options.input?.toJson(),
           cancelToken: options.cancelToken,
-          useJson: useJson,
-        ))
-      .then((ret) {
-      if (!ret.error) {
+          useJson: options.useJson,
+        ),
+      ).then((ret) {
+        if (!ret.error) {
+          return TransformedResponse(
+            error: false,
+            data: options.fromJson(ret.data),
+            statusCode: ret.statusCode,
+          );
+        }
         return TransformedResponse(
-          error: false,
-          data: options.fromJson(ret.data),
+          error: true,
+          message: ret.message,
           statusCode: ret.statusCode,
         );
       }
-      return TransformedResponse(
-        error: true,
-        message: ret.message,
-        statusCode: ret.statusCode,
-      );
-    });
+    );
   }
 
-  Future<TransformedResponse<Response>>
-    mutate<T extends BaseOperation<BaseInput, Response>, Response>(
-    T options,  
-    { Map<String, dynamic>? mapInput, bool? removeNull, }
-  ) {
-    var input = mapInput ?? options.input?.toJson();
-    return super
-        .doMutate(MutationRequestOptions(
-      operationName: options.operationName,
-      input: removeNull == true ? super.removeNull(input) : input,
-      cancelToken: options.cancelToken,
-    )).then((ret) {
+  Future<TransformedResponse<Response>> mutate<T extends BaseOperation<BaseInput, Response>, Response>(T options) {
+    var input = options.mapInput ?? options.input?.toJson();
+    return super.doMutate(
+      MutationRequestOptions(
+        operationName: options.operationName,
+        input: options.removeNull == true ? super.removeNull(input) : input,
+        cancelToken: options.cancelToken,
+      ),
+    ).then((ret) {
       if (!ret.error) {
         return TransformedResponse(
           error: false,
@@ -75,31 +71,29 @@ class FireboomClient extends BaseClient {
   }
 
   // SSE流转换器
-  StreamTransformer<String, Response>
-      _sseTransformer<T extends BaseOperation<BaseInput, Response>, Response>(
-              T options) =>
-          StreamTransformer<String, Response>.fromHandlers(
-              handleData: (response, sink) async {
-            try {
-              Map<String, dynamic> map = jsonDecode(response);
-              if (map["data"] != null) {
-                var result = options.fromJson(map["data"]);
-                sink.add(result);
-              }
-            } catch (e) {
-              // do nothing
-            }
-          });
+  StreamTransformer<String, Response> _sseTransformer<T extends BaseOperation<BaseInput, Response>, Response>(T options) =>
+    StreamTransformer<String, Response>.fromHandlers(
+      handleData: (response, sink) async {
+        try {
+          Map<String, dynamic> map = jsonDecode(response);
+          if (map["data"] != null) {
+            var result = options.fromJson(map["data"]);
+            sink.add(result);
+          }
+        } catch (e) {
+          // do nothing
+        }
+      },
+    );
 
-  Stream<Response> subscribe<T extends BaseOperation<BaseInput, Response>, Response>(
-    T options, 
-    { Map<String, dynamic>? mapInput, }
-  ) async* {
-    var sub = super.doSubscribe(SubscriptionRequestOptions(
-      operationName: options.operationName,
-      input: mapInput ?? options.input?.toJson(),
-      cancelToken: options.cancelToken,
-    ));
+  Stream<Response> subscribe<T extends BaseOperation<BaseInput, Response>, Response>(T options) async* {
+    var sub = super.doSubscribe(
+      SubscriptionRequestOptions(
+        operationName: options.operationName,
+        input: options.mapInput ?? options.input?.toJson(),
+        cancelToken: options.cancelToken,
+      ),
+    );
     // 使用转换器转换SSE响应流
     var transformSub = sub.transform<Response>(this._sseTransformer(options));
 
@@ -147,7 +141,13 @@ class FireboomClient extends BaseClient {
 {{#each this}}
 class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}, {{name}}ResponseData> {
   {{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}? input;
-  {{upperFirst name}}({ this.input, super.cancelToken })
+  {{upperFirst name}}({
+    this.input,
+    super.cancelToken,
+    super.mapInput,
+    super.useJson,
+    super.removeNull,
+  })
     : super("{{path}}", OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}}), input: input );
 
   @override

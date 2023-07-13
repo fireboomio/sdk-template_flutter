@@ -233,12 +233,28 @@ class EmptyInput extends BaseInput {
 abstract class BaseOperation<Input extends BaseInput, Response> {
   final String operationName;
   OperationMetadataItem metadata;
+
+  /// Operation query data
   Input? input;
+
+  /// Use Map<> directly, no input class required.
+  Map<String, dynamic>? mapInput;
+
+  /// Use wg_variables to send query. This is useful when you need to send array in query url.
+  bool? useJson;
+
+  /// When you want to remove null properties in mutate data.
+  bool? removeNull;
+
+  /// CancelToken when you need to cancel this request
   CancelToken? cancelToken;
   BaseOperation(
     this.operationName,
     this.metadata, {
     this.input,
+    this.mapInput,
+    this.useJson,
+    this.removeNull,
     this.cancelToken,
   });
   Response fromJson(Map<String, dynamic> json);
