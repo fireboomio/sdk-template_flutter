@@ -83,7 +83,6 @@ class FireboomClient extends BaseClient {
             var lines =
                 response.split('\n').where((line) => line.trim().isNotEmpty);
             for (var line in lines) {
-              print(line);
               Map<String, dynamic> map = jsonDecode(line);
               if (map['errors'] != null) {
                 sink.add(TransformedResponse(
