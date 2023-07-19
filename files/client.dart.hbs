@@ -75,13 +75,29 @@ class FireboomClient extends BaseClient {
     StreamTransformer<String, Response>.fromHandlers(
       handleData: (response, sink) async {
         try {
-          Map<String, dynamic> map = jsonDecode(response);
-          if (map["data"] != null) {
-            var result = options.fromJson(map["data"]);
-            sink.add(result);
+          if (response.startsWith('[error]: ')) {
+            sink.add(TransformedResponse(
+                error: true, message: response.substring(9)));
+          } else {
+            // 解码
+            var lines =
+                response.split('\n').where((line) => line.trim().isNotEmpty);
+            for (var line in lines) {
+              print(line);
+              Map<String, dynamic> map = jsonDecode(line);
+              if (map['errors'] != null) {
+                sink.add(TransformedResponse(
+                  error: true,
+                  message: map['errors'].map((e) => e.message).join('\n'),
+                ));
+              } else if (map["data"] != null) {
+                var result = options.fromJson(map["data"]);
+                sink.add(TransformedResponse(error: false, data: result));
+              }
+            }
           }
         } catch (e) {
-          // do nothing
+          sink.add(TransformedResponse(error: true, message: e.toString()));
         }
       },
     );

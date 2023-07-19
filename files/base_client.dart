@@ -19,6 +19,29 @@ class BaseClient {
         false;
   }
 
+  TransformedResponse _parseDioError(DioError e) {
+    // The request was made and the server responded with a status code
+    // that falls out of the range of 2xx and is also not 304.
+    var msg = '';
+    if (e.response != null) {
+      var data = e.response!.data;
+      if (data is Map<String, dynamic>) {
+        msg = data['message'];
+      } else if (data is String) {
+        msg = data;
+      }
+      msg = data ?? e.response!.statusMessage;
+    }
+    if (msg.isEmpty) {
+      msg = e.message ?? '发生错误';
+    }
+    return TransformedResponse(
+      error: true,
+      statusCode: e.response?.statusCode,
+      message: msg.replaceAll('hooks pipeline failed:', '').trim(),
+    );
+  }
+
   Future<TransformedResponse> _wrapRequest<T>(
       Future<Response<T>> Function() fn) async {
     try {
@@ -40,26 +63,7 @@ class BaseClient {
               .replaceAll('hooks pipeline failed:', '')
               .trim());
     } on DioError catch (e) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx and is also not 304.
-      var msg = '';
-      if (e.response != null) {
-        var data = e.response!.data;
-        if (data is Map<String, dynamic>) {
-          msg = data['message'];
-        } else if (data is String) {
-          msg = data;
-        }
-        msg = data ?? e.response!.statusMessage;
-      }
-      if (msg.isEmpty) {
-        msg = e.message ?? '发生错误';
-      }
-      return TransformedResponse(
-        error: true,
-        statusCode: e.response?.statusCode,
-        message: msg.replaceAll('hooks pipeline failed:', '').trim(),
-      );
+      return _parseDioError(e);
     }
   }
 
@@ -167,8 +171,10 @@ class BaseClient {
         var eventData = utf8.decode(event);
         yield eventData;
       }
-    } catch (e) {
-      throw e;
+    } on DioError catch (e) {
+      print(e);
+      var ret = _parseDioError(e);
+      yield '[error]: ${ret.message!}';
     }
   }
 
