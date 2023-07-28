@@ -71,8 +71,8 @@ class FireboomClient extends BaseClient {
   }
 
   // SSE流转换器
-  StreamTransformer<String, Response> _sseTransformer<T extends BaseOperation<BaseInput, Response>, Response>(T options) =>
-    StreamTransformer<String, Response>.fromHandlers(
+  StreamTransformer<String, TransformedResponse<Response>> _sseTransformer<T extends BaseOperation<BaseInput, Response>, Response>(T options) =>
+    StreamTransformer<String, TransformedResponse<Response>>.fromHandlers(
       handleData: (response, sink) async {
         try {
           if (response.startsWith('[error]: ')) {
@@ -101,7 +101,7 @@ class FireboomClient extends BaseClient {
       },
     );
 
-  Stream<Response> subscribe<T extends BaseOperation<BaseInput, Response>, Response>(T options) async* {
+  Stream<TransformedResponse<Response>> subscribe<T extends BaseOperation<BaseInput, Response>, Response>(T options) async* {
     var sub = super.doSubscribe(
       SubscriptionRequestOptions(
         operationName: options.operationName,
@@ -110,7 +110,7 @@ class FireboomClient extends BaseClient {
       ),
     );
     // 使用转换器转换SSE响应流
-    var transformSub = sub.transform<Response>(this._sseTransformer(options));
+    var transformSub = sub.transform<TransformedResponse<Response>>(this._sseTransformer(options));
 
     yield* transformSub;
   }
