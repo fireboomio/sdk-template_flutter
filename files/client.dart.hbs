@@ -151,17 +151,16 @@ class FireboomClient extends BaseClient {
   }
 }
 
-{{#with (filterOperations operations '!isInternal' true)}}
-{{#if (isNotEmpty this)}}
-{{#each this}}
+{{#each operations}}
+{{#if (invertBool isInternal)}}
 class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}, {{name}}ResponseData> {
   {{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}? input;
   {{upperFirst name}}({
-    this.input,
-    super.cancelToken,
-    super.mapInput,
-    super.useJson,
-    super.removeNull,
+     this.input,
+     super.cancelToken,
+     super.mapInput,
+     super.useJson,
+     super.removeNull,
   })
     : super("{{path}}", OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}}), input: input );
 
@@ -170,6 +169,5 @@ class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{e
     return {{name}}ResponseData.fromJson(json);
   }
 }
-{{/each}}
 {{/if}}
-{{/with}}
+{{/each}}
