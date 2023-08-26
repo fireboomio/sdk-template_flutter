@@ -11,8 +11,8 @@ const s3Providers = {
 {{#each s3Providers}}
   '{{name}}': {
     'useSSL': {{useSSL}},
-    'bucketName': '{{bucketName.staticVariableContent}}',
-    'endpoint': '{{endpoint.staticVariableContent}}',
+    'bucketName': '{{getVariableString bucketName}}',
+    'endpoint': '{{getVariableString endpoint}}',
   },
 {{/each}}
 };
