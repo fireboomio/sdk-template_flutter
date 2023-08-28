@@ -18,6 +18,12 @@ const s3Providers = {
 };
 {{/if}}
 
+{{#each operations}}
+    {{#equal engine 2}}
+typedef {{name}}ResponseData = dynamic;
+    {{/equal}}
+{{/each}}
+
 class FireboomClient extends BaseClient {
   FireboomClient(BaseClientOptions options): super(options);
 	Future<TransformedResponse<Response>> query<T extends BaseOperation<BaseInput, Response>, Response>(T options) {
