@@ -162,7 +162,7 @@ class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{e
      super.useJson,
      super.removeNull,
   })
-    : super("{{path}}", OperationMetadataItem(requiresAuthentication: {{requiresAuthentication}}), input: input );
+    : super("{{path}}", OperationMetadataItem(requiresAuthentication: {{authRequired}}), input: input );
 
   @override
   {{name}}ResponseData fromJson(Map<String, dynamic> json) {
