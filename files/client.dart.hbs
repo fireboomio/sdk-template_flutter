@@ -18,12 +18,6 @@ const s3Providers = {
 };
 {{/if}}
 
-{{#each operations}}
-    {{#equal engine 2}}
-typedef {{name}}ResponseData = dynamic;
-    {{/equal}}
-{{/each}}
-
 class FireboomClient extends BaseClient {
   FireboomClient(BaseClientOptions options): super(options);
 	Future<TransformedResponse<Response>> query<T extends BaseOperation<BaseInput, Response>, Response>(T options) {
@@ -172,7 +166,11 @@ class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{e
 
   @override
   {{name}}ResponseData fromJson(Map<String, dynamic> json) {
+    {{#if (equalAny engine 2)}}
+    return json
+    {{else}}
     return {{name}}ResponseData.fromJson(json);
+    {{/if}}
   }
 }
 {{/if}}

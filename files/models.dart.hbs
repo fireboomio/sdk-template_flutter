@@ -5,6 +5,12 @@ import './interface.dart';
 
 part 'models.g.dart';
 
+{{#each operations}}
+    {{#equal engine 2}}
+typedef {{name}}ResponseData = dynamic;
+    {{/equal}}
+{{/each}}
+
 {{#each objectFieldArray}}
 {{#unless (equalAny root 'InternalInput')}}
 @JsonSerializable()
