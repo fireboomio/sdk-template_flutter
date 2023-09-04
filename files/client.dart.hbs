@@ -51,7 +51,7 @@ class FireboomClient extends BaseClient {
     return super.doMutate(
       MutationRequestOptions(
         operationName: options.operationName,
-        input: options.removeNull == true ? super.removeNull(input) : input,
+        input: options.removeNull != false ? super.removeNull(input) : input,
         cancelToken: options.cancelToken,
       ),
     ).then((ret) {
