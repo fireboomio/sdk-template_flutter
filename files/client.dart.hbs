@@ -167,7 +167,7 @@ class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{e
   @override
   {{name}}ResponseData fromJson(Map<String, dynamic> json) {
     {{#if (equalAny engine 2)}}
-    return json
+    return json;
     {{else}}
     return {{name}}ResponseData.fromJson(json);
     {{/if}}
