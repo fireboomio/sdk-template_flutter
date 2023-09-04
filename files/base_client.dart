@@ -30,7 +30,11 @@ class BaseClient {
       } else if (data is String) {
         msg = data;
       }
-      msg = data ?? e.response!.statusMessage;
+      if (msg.isEmpty &&
+          e.response!.statusMessage != null &&
+          e.response!.statusMessage!.isNotEmpty) {
+        msg = e.response!.statusMessage!;
+      }
     }
     if (msg.isEmpty) {
       msg = e.message ?? '发生错误';
