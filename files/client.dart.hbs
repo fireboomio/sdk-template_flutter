@@ -142,7 +142,7 @@ class FireboomClient extends BaseClient {
     var client = FireboomClient(
       BaseClientOptions(
         baseURL: config?.baseURL ?? "http://localhost:9991",
-        csrfEnabled: true,
+        csrfEnabled: {{enableCSRFProtect}},
         onInit: config?.onInit,
       ),
     );
