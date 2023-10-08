@@ -28,6 +28,7 @@ class FireboomClient extends BaseClient {
           input: options.mapInput ?? options.input?.toJson(),
           cancelToken: options.cancelToken,
           useJson: options.useJson,
+          revalidate: options.revalidate,
         ),
       ).then((ret) {
         if (!ret.error) {
@@ -53,6 +54,7 @@ class FireboomClient extends BaseClient {
         operationName: options.operationName,
         input: options.removeNull != false ? super.removeNull(input) : input,
         cancelToken: options.cancelToken,
+        revalidate: options.revalidate,
       ),
     ).then((ret) {
       if (!ret.error) {
@@ -107,6 +109,7 @@ class FireboomClient extends BaseClient {
         operationName: options.operationName,
         input: options.mapInput ?? options.input?.toJson(),
         cancelToken: options.cancelToken,
+        revalidate: options.revalidate,
       ),
     );
     // 使用转换器转换SSE响应流
@@ -161,6 +164,7 @@ class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{e
     super.mapInput,
     super.useJson,
     super.removeNull,
+    super.revalidate,
   })
     : super("{{path}}", OperationMetadataItem(requiresAuthentication: {{authRequired}}), input: input );
 

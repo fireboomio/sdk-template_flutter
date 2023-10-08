@@ -101,10 +101,12 @@ class OperationRequestOptions<OperationName extends String,
   OperationName operationName;
   CancelToken? cancelToken;
   Input? input;
+  bool? revalidate;
   OperationRequestOptions({
     required this.operationName,
     this.cancelToken,
     this.input,
+    this.revalidate,
   });
 }
 
@@ -119,6 +121,7 @@ class QueryRequestOptions<OperationName extends String,
     super.input,
     super.cancelToken,
     this.useJson,
+    super.revalidate,
   });
 }
 
@@ -129,6 +132,7 @@ class MutationRequestOptions<OperationName extends String,
     required super.operationName,
     super.input,
     super.cancelToken,
+    super.revalidate,
   });
 }
 
@@ -139,6 +143,7 @@ class SubscriptionRequestOptions<OperationName extends String,
     required super.operationName,
     super.input,
     super.cancelToken,
+    super.revalidate,
   });
 }
 
@@ -248,6 +253,10 @@ abstract class BaseOperation<Input extends BaseInput, Response> {
 
   /// CancelToken when you need to cancel this request
   CancelToken? cancelToken;
+
+  /// Revalidate
+  bool? revalidate;
+
   BaseOperation(
     this.operationName,
     this.metadata, {
@@ -256,6 +265,7 @@ abstract class BaseOperation<Input extends BaseInput, Response> {
     this.useJson,
     this.removeNull,
     this.cancelToken,
+    this.revalidate,
   });
   Response fromJson(Map<String, dynamic> json);
 }
