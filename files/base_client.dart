@@ -111,11 +111,12 @@ class BaseClient {
   /// The method only throws an error if the request fails to reach the server or
   /// the server returns a non-200 status code. Application errors are returned as part of the response.
   Future<TransformedResponse> doQuery(QueryRequestOptions options) async {
+    options.input = options.input ?? {};
     if (options.subscribeOnce == true) {
-      options.input = {
-        ...?options.input,
-        ...{'wg_subscribe_once': 'true'}
-      };
+      options.input!['wg_subscribe_once'] = 'true';
+    }
+    if (options.revalidate != null) {
+      options.input!['revalidate'] = options.revalidate;
     }
     if (options.useJson == true) {
       options.input = {'wg_variables': jsonEncode(options.input)};
@@ -152,6 +153,9 @@ class BaseClient {
     }
     return _wrapRequest(() => _dio.post(
           "/operations/${options.operationName}",
+          queryParameters: options.revalidate != null
+              ? {'revalidate': options.revalidate}
+              : null,
           data: options.input,
           cancelToken: options.cancelToken,
           options: Options(headers: {...?_options.extraHeaders, ...headers}),
@@ -161,6 +165,9 @@ class BaseClient {
   Stream<String> doSubscribe(SubscriptionRequestOptions options) async* {
     var input = options.input ?? {};
     input['useSSE'] = true;
+    if (options.revalidate != null) {
+      input['revalidate'] = options.revalidate;
+    }
     try {
       var resp = await _dio.get<ResponseBody>(
         "/operations/${options.operationName}",
