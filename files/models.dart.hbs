@@ -7,7 +7,7 @@ part 'models.g.dart';
 
 {{#each operations}}
     {{#equal engine 2}}
-typedef {{name}}ResponseData = dynamic;
+typedef {{upperFirst name}}ResponseData = dynamic;
     {{/equal}}
 {{/each}}
 

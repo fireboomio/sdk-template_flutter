@@ -156,8 +156,8 @@ class FireboomClient extends BaseClient {
 
 {{#each operations}}
 {{#if (invertBool isInternal)}}
-class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}, {{name}}ResponseData> {
-  {{#if hasInput}}{{name}}Input{{else}}EmptyInput{{/if}}? input;
+class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{upperFirst name}}Input{{else}}EmptyInput{{/if}}, {{upperFirst name}}ResponseData> {
+  {{#if hasInput}}{{upperFirst name}}Input{{else}}EmptyInput{{/if}}? input;
   {{upperFirst name}}({
     this.input,
     super.cancelToken,
@@ -169,11 +169,11 @@ class {{upperFirst name}} extends BaseOperation<{{#if hasInput}}{{name}}Input{{e
     : super("{{path}}", OperationMetadataItem(requiresAuthentication: {{authRequired}}), input: input );
 
   @override
-  {{name}}ResponseData fromJson(Map<String, dynamic> json) {
+  {{upperFirst name}}ResponseData fromJson(Map<String, dynamic> json) {
     {{#if (equalAny engine 2)}}
     return json;
     {{else}}
-    return {{name}}ResponseData.fromJson(json);
+    return {{upperFirst name}}ResponseData.fromJson(json);
     {{/if}}
   }
 }
