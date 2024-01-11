@@ -6,9 +6,9 @@ import './interface.dart';
 part 'models.g.dart';
 
 {{#each operations}}
-    {{#equal engine 2}}
+  {{#equal engine 2}}
 typedef {{upperFirst name}}ResponseData = dynamic;
-    {{/equal}}
+  {{/equal}}
 {{/each}}
 
 {{#each objectFieldArray}}
@@ -16,7 +16,8 @@ typedef {{upperFirst name}}ResponseData = dynamic;
 @JsonSerializable()
 class {{upperFirst (joinString '_' documentPath)}}{{#equal root 'Input'}} extends BaseInput{{/equal}} {
   {{#each fields}}
-  {{> keywords_jsonkey name=name}}
+  {{#if description}}/** {{description}} */
+  {{/if}}{{> keywords_jsonkey name=name~}}
   {{#if isArray}}List<{{/if}}{{~#if typeRefObject~}}
     {{~upperFirst (joinString '_' typeRefObject.documentPath)~}}
   {{~else~}}
@@ -47,7 +48,8 @@ class {{upperFirst (joinString '_' documentPath)}}{{#equal root 'Input'}} extend
 @JsonEnum(valueField: 'value')
 enum {{upperFirst name}} {
   {{#each values}}
-  {{upperFirst this}}("{{this}}"){{#if @last}};{{else}},{{/if}}
+  {{#if description}}/** {{description}} */
+  {{/if}}{{upperFirst this}}("{{this}}"){{#if @last}};{{else}},{{/if}}
   {{/each}}
 
   final String value;
